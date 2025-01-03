@@ -13,7 +13,9 @@ export async function getProperties() {
     console.log('API Response status:', response.status);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status , response.statusText}`);
+      // console.log();
+      
     }
 
     const data = await response.json();
@@ -42,12 +44,12 @@ export async function addProperty(propertyData: any) {
     console.log( "api post data",propertyData);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status , response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error adding property:', error);
+    console.error('Error adding property: error in catch block', error);
     throw error;
   }
 }
