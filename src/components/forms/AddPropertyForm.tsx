@@ -65,11 +65,6 @@ const formSteps: FormStep[] = [
       { id: 'remainingInstallment', label: 'अवशेष विक्रय मूल किस्त धनराशि', type: 'number' },
       { id: 'interestAmount', label: 'ब्याज धनराशि', type: 'number' },
       { id: 'remainingInstallmentDate', label: 'दिनांक', type: 'date' },
-    ]
-  },
-  {
-    title: 'Additional Details',
-    fields: [
       { id: 'area', label: 'क्षेत्रफल (वर्ग मीटर)', type: 'number' },
       { id: 'possessionDate', label: 'कब्जा दिनांक', type: 'date' },
       { id: 'additionalLandAmount', label: 'अतिरिक्त भूमि की धनराशि', type: 'number' },
@@ -78,13 +73,36 @@ const formSteps: FormStep[] = [
     ]
   },
   {
+    title: 'Payment History',
+    fields: []
+  },
+  {
     title: 'Service Charges',
     fields: []
   },
   {
-    title: 'Payment History',
-    fields: []
-  }
+    title: 'Additional Details',
+    fields: [
+      { id: 'registrationCharges', label: 'निबंधन शुल्क', type: 'number' },
+      { id: 'registrationDate2', label: 'निबंधन दिनांक', type: 'date' },
+      { id: 'transferName', label: 'नामंतारी का नाम', type: 'text' },
+      { id: 'transferorFather/HusbandName', label: 'नामंतारी के पिता/पति का नाम', type: 'text' },
+      { id: 'transferorAddress', label: 'पता', type: 'text' },
+      { id: 'inheritance', label: 'वरासत', type: 'text' },
+      { id: 'transferCharges', label: 'नामांतरण शुल्क', type: 'number' },
+      { id: 'documentationCharges', label: 'डॉक्यूमेंटेशन शुल्क', type: 'number' },
+      { id: 'transferDate', label: 'नामांतरण दिनांक', type: 'date' },
+      { id: 'buildingPlanApprovalDate', label: 'भवन मानचित्र स्वीकृति दिनांक', type: 'date' },
+      { id: 'buildingConstruction', label: 'भवन निर्माण (हां/नहीं)', type: 'text' },
+      { id: 'depositDateReceiptNumber', label: 'जमा धनराशि दिनांक व रसीद संख्या', type: 'text' },
+      { id: 'changeCharges', label: 'परिवर्तन शुल्क', type: 'number' },
+      { id: 'advertisementFee', label: 'विज्ञापन शुल्क', type: 'number' },
+
+
+    ]
+  },
+  
+  
 ];
 
 interface AddPropertyFormProps {
@@ -95,7 +113,7 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [paymentHistory, setPaymentHistory] = useState<PaymentRecord[]>([]);
-  const [serviceCharge, setServiceCharges] = useState<ServiceChargeRecord[]>([]);
+  const [serviceChargeHistory, setServiceChargeHistory] = useState<ServiceChargeRecord[]>([]);
   const [newPayment, setNewPayment] = useState<PaymentRecord>({
     installmentAmount: 0,
     installmentInterest: 0,
@@ -136,8 +154,8 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
   };
 
   const handleAddServiceCharge = () => {
-    if (newServiceCharge.amount && newServiceCharge.financialYear) {
-      setServiceCharges([...serviceCharge, newServiceCharge]);
+    if (newServiceCharge.financialYear && newServiceCharge.amount && newServiceCharge.date) {
+      setServiceChargeHistory([...serviceChargeHistory, newServiceCharge]);
       setNewServiceCharge({
         financialYear: '',
         amount: 0,
@@ -152,18 +170,26 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
   };
 
   const handleRemoveServiceCharge = (index: number) => {
-    setServiceCharges(serviceCharge.filter((_, i) => i !== index));
+    setServiceChargeHistory(serviceChargeHistory.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+     
+  // Only proceed if we have at least one payment record
+  if (serviceChargeHistory.length === 0) {
+    // toast.error('Please add at least one payment record');
+    return;
+  }
+
+  setIsSubmitting(true);
+
 
     try {
       const transformedData = {
         serialNumber: parseInt(formData.serialNumber || '0'),
         schemeName: formData.schemeName,
-        propertyId: formData.propertyId,
+        // propertyId: formData.propertyId,
         ownerName: formData.ownerName,
         fatherName: formData.fatherName,
         permanentAddress: formData.permanentAddress,
@@ -189,7 +215,21 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
         restoration_charges: parseFloat(formData.restorationCharges || '0'),
         certificate_charges: parseFloat(formData.certificateCharges || '0'),
         paymentHistory,
-        serviceCharge
+        serviceChargeHistory,
+        registrationCharges: parseFloat(formData.registrationCharges || '0'),
+        registrationDate2 : formData.registrationDate2,
+        transferName : formData.transferName,
+        transferorFatherHusbandName: formData.transferorFatherHusbandName,
+        transferorAddress : formData.transferorAddress,
+        inheritance: formData.inheritance,
+        transferCharges : parseFloat(formData.transferCharges || '0'),
+        documentationCharges : parseFloat(formData.documentationCharges || '0'),
+        transferDate : formData.transferDate,
+        buildingPlanApprovalDate : formData.buildingPlanApprovalDate,
+        buildingConstruction : formData.buildingConstruction,
+        depositDateReceiptNumber: formData.depositDateReceiptNumber,
+        changeCharges: parseFloat(formData.changeCharges || '0'),
+        advertisementFee: parseFloat(formData.advertisementFee || '0'),
       };
       
       await addProperty(transformedData);
@@ -203,246 +243,109 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
     }
   };
 
-  const renderStepContent = () => {
-    if (currentStep === 4) { // Service Charges step
-      return (
-        <div className="space-y-6">
-          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
-            <h4 className="text-lg font-medium mb-4">Add Service Charge Record</h4>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">वित्तीय वर्ष</label>
-                <input
-                  type="text"
-                  value={newServiceCharge.financialYear}
-                  onChange={(e) => setNewServiceCharge({
-                    ...newServiceCharge,
-                    financialYear: e.target.value
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">सर्विस चार्ज धनराशि</label>
-                <input
-                  type="number"
-                  value={newServiceCharge.amount}
-                  onChange={(e) => setNewServiceCharge({
-                    ...newServiceCharge,
-                    amount: parseFloat(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">विलंब शुल्क</label>
-                <input
-                  type="number"
-                  value={newServiceCharge.lateFee}
-                  onChange={(e) => setNewServiceCharge({
-                    ...newServiceCharge,
-                    lateFee: parseFloat(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">दिनांक</label>
-                <input
-                  type="date"
-                  value={newServiceCharge.date}
-                  onChange={(e) => setNewServiceCharge({
-                    ...newServiceCharge,
-                    date: e.target.value
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddServiceCharge}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Add Service Charge
-            </button>
+  const renderServiceChargeStep = () => (
+    <div className="space-y-6">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-">
+        <h4 className="text-lg font-medium mb-4">Add Service Charge</h4>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">वित्तीय वर्ष</label>
+            <input
+              type="text"
+              value={newServiceCharge.financialYear}
+              onChange={(e) => setNewServiceCharge({
+                ...newServiceCharge,
+                financialYear: e.target.value
+              })}
+              className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-
-          {serviceCharge.length > 0 && (
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">वित्तीय वर्ष</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">सर्विस चार्ज धनराशि</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">विलंब शुल्क</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">दिनांक</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {serviceCharge.map((charge, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 text-sm">{charge.financialYear}</td>
-                      <td className="px-6 py-4 text-sm">₹{charge.amount}</td>
-                      <td className="px-6 py-4 text-sm">₹{charge.lateFee}</td>
-                      <td className="px-6 py-4 text-sm">{charge.date}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveServiceCharge(index)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      );
-    } else if (currentStep === 5) { // Payment History step
-      return (
-        <div className="space-y-6">
-          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
-            <h4 className="text-lg font-medium mb-4">Add Payment Record</h4>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">किस्त जमा धनराशि</label>
-                <input
-                  type="number"
-                  value={newPayment.installmentAmount}
-                  onChange={(e) => setNewPayment({
-                    ...newPayment,
-                    installmentAmount: parseFloat(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">किस्त जमा ब्याज धनराशि</label>
-                <input
-                  type="number"
-                  value={newPayment.installmentInterest}
-                  onChange={(e) => setNewPayment({
-                    ...newPayment,
-                    installmentInterest: parseFloat(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">विलंब ब्याज धनराशि</label>
-                <input
-                  type="number"
-                  value={newPayment.delayedInterestAmount}
-                  onChange={(e) => setNewPayment({
-                    ...newPayment,
-                    delayedInterestAmount: parseFloat(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">दिनांक</label>
-                <input
-                  type="date"
-                  value={newPayment.installmentDate}
-                  onChange={(e) => setNewPayment({
-                    ...newPayment,
-                    installmentDate: e.target.value
-                  })}
-                  className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddPayment}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Add Payment
-            </button>
+          <div>
+            <label className="block text-sm font-medium mb-1">सर्विस चार्ज धनराशि</label>
+            <input
+              type="number"
+              value={newServiceCharge.amount}
+              onChange={(e) => setNewServiceCharge({
+                ...newServiceCharge,
+                amount: parseFloat(e.target.value)
+              })}
+              className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">विलंब शुल्क</label>
+            <input
+              type="number"
+              value={newServiceCharge.lateFee}
+              onChange={(e) => setNewServiceCharge({
+                ...newServiceCharge,
+                lateFee: parseFloat(e.target.value)
+              })}
+              className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">दिनांक</label>
+            <input
+              type="date"
+              value={newServiceCharge.date}
+              onChange={(e) => setNewServiceCharge({
+                ...newServiceCharge,
+                date: e.target.value
+              })}
+              className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddServiceCharge}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Add Service Charge
+        </button>
+      </div>
 
-          {paymentHistory.length > 0 && (
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">किस्त जमा धनराशि</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">किस्त जमा ब्याज धनराशि</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">विलंब ब्याज धनराशि</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">दिनांक</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paymentHistory.map((payment, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 text-sm">₹{payment.installmentAmount}</td>
-                      <td className="px-6 py-4 text-sm">₹{payment.installmentInterest}</td>
-                      <td className="px-6 py-4 text-sm">₹{payment.delayedInterestAmount}</td>
-                      <td className="px-6 py-4 text-sm">{payment.installmentDate}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePayment(index)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {serviceChargeHistory.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">वित्तीय वर्ष</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">सर्विस चार्ज धनराशि</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">विलंब शुल्क</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">दिनांक</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500"></th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {serviceChargeHistory.map((charge, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 text-sm">{charge.financialYear}</td>
+                  <td className="px-6 py-4 text-sm">₹{charge.amount}</td>
+                  <td className="px-6 py-4 text-sm">₹{charge.lateFee}</td>
+                  <td className="px-6 py-4 text-sm">{charge.date}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveServiceCharge(index)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      );
-    } else {
-      return (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-          {formSteps[currentStep].fields.map((field) => (
-            <div key={field.id}>
-              <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {field.label}
-                <span className="text-red-500 dark:text-red-400 ml-1">*</span>
-              </label>
-              {field.type === 'select' ? (
-                <select
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0 transition-colors text-sm"
-                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  value={formData[field.id] || ''}
-                >
-                  <option value="" className="dark:bg-gray-800">Select option...</option>
-                  {field.options?.map(option => (
-                    <option key={option} value={option} className="dark:bg-gray-800">{option}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0 transition-colors text-sm"
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  value={formData[field.id] || ''}
-                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
-  };
+      )}
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Property Record</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
@@ -451,7 +354,6 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
         </div>
 
         <div className="p-6">
-          {/* Steps indicator */}
           <div className="flex justify-center mb-8">
             {formSteps.map((step, index) => (
               <div
@@ -485,7 +387,138 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
 
           <form onSubmit={handleSubmit}>
             <div className="max-h-[60vh] overflow-y-auto px-2 mt-8 custom-scrollbar">
-              {renderStepContent()}
+              {currentStep === 4 ? (
+                renderServiceChargeStep()
+              ) : currentStep === 3 ? (
+                <div className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-medium mb-4">Add Payment Record</h4>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">किस्त जमा धनराशि</label>
+                        <input
+                          type="number"
+                          value={newPayment.installmentAmount}
+                          onChange={(e) => setNewPayment({
+                            ...newPayment,
+                            installmentAmount: parseFloat(e.target.value)
+                          })}
+                          className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">किस्त जमा ब्याज धनराशि</label>
+                        <input
+                          type="number"
+                          value={newPayment.installmentInterest}
+                          onChange={(e) => setNewPayment({
+                            ...newPayment,
+                            installmentInterest: parseFloat(e.target.value)
+                          })}
+                          className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">विलंब ब्याज धनराशि</label>
+                        <input
+                          type="number"
+                          value={newPayment.delayedInterestAmount}
+                          onChange={(e) => setNewPayment({
+                            ...newPayment,
+                            delayedInterestAmount: parseFloat(e.target.value)
+                          })}
+                          className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">दिनांक</label>
+                        <input
+                          type="date"
+                          value={newPayment.installmentDate}
+                          onChange={(e) => setNewPayment({
+                            ...newPayment,
+                            installmentDate: e.target.value
+                          })}
+                          className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddPayment}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add Payment
+                    </button>
+                  </div>
+
+                  {paymentHistory.length > 0 && (
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">किस्त जमा धनराशि</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">किस्त जमा ब्याज धनराशि</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">विलंब ब्याज धनराशि</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">दिनांक</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {paymentHistory.map((payment, index) => (
+                            <tr key={index}>
+                              <td className="px-6 py-4 text-sm">₹{payment.installmentAmount}</td>
+                              <td className="px-6 py-4 text-sm">₹{payment.installmentInterest}</td>
+                              <td className="px-6 py-4 text-sm">₹{payment.delayedInterestAmount}</td>
+                              <td className="px-6 py-4 text-sm">{payment.installmentDate}</td>
+                              <td className="px-6 py-4 text-sm">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemovePayment(index)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  {formSteps[currentStep].fields.map((field) => (
+                    <div key={field.id}>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                        {field.label}
+                        <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+                      </label>
+                      {field.type === 'select' ? (
+                        <select
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0 transition-colors text-sm"
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          value={formData[field.id] || ''}
+                        >
+                          <option value="" className="dark:bg-gray-800">Select option...</option>
+                          {field.options?.map(option => (
+                            <option key={option} value={option} className="dark:bg-gray-800">{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type}
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0 transition-colors text-sm"
+                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          value={formData[field.id] || ''}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-6 flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -522,6 +555,7 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
   );
 }
 
+//installment working
 // import React, { useState } from 'react';
 // import { X } from 'lucide-react';
 // import { cn } from '../../utils/cn';
