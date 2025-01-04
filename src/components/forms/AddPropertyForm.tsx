@@ -34,7 +34,8 @@ const formSteps: FormStep[] = [
   {
     title: 'Basic Information',
     fields: [
-      { id: 'schemeName', label: 'योजना का नाम', type: 'text' },
+      // { id: 'schemeName', label: 'योजना का नाम', type: 'text' },
+      { id: 'schemeName', label: 'योजना का नाम', type: 'select', options: ['hariyanv', 'bidamart', 'pipris'] },
       { id: 'category', label: 'आवंटित संपत्ति की श्रेणी', type: 'select', options: ['MIG', 'LIG', 'EWS'] },
       { id: 'ownerName', label: 'आवंटी का नाम', type: 'text' },
       { id: 'fatherName', label: 'पिता/पति का नाम', type: 'text' },
@@ -77,10 +78,6 @@ const formSteps: FormStep[] = [
     fields: []
   },
   {
-    title: 'Service Charges',
-    fields: []
-  },
-  {
     title: 'Additional Details',
     fields: [
       { id: 'registrationCharges', label: 'निबंधन शुल्क', type: 'number' },
@@ -100,6 +97,10 @@ const formSteps: FormStep[] = [
 
 
     ]
+  },
+  {
+    title: 'Service Charges',
+    fields: []
   },
   
   
@@ -181,9 +182,7 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
     // toast.error('Please add at least one payment record');
     return;
   }
-
   setIsSubmitting(true);
-
 
     try {
       const transformedData = {
@@ -236,6 +235,7 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
       toast.success('Property added successfully');
       setIsSubmitting(false);
       onClose();
+      
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Failed to add property. Please try again.');
@@ -387,7 +387,7 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
 
           <form onSubmit={handleSubmit}>
             <div className="max-h-[60vh] overflow-y-auto px-2 mt-8 custom-scrollbar">
-              {currentStep === 4 ? (
+              {currentStep === 5 ? (
                 renderServiceChargeStep()
               ) : currentStep === 3 ? (
                 <div className="space-y-6">
