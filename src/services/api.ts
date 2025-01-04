@@ -33,23 +33,28 @@ export async function getProperties() {
 
 export async function addProperty(propertyData: any) {
   try {
+    console.log( "api post data before", propertyData);
     const response = await fetch(`${API_BASE_URL}/property`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      // body: propertyData,
       body: JSON.stringify(propertyData),
       
     });
-    console.log( "api post data",propertyData);
+    console.log( "api post data", propertyData);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status , response.statusText}`);
+      console.log( "api post data if response not present", propertyData);
+      throw new Error(`HTTP error! status: ${response.status}`);
+
     }
 
     return await response.json();
   } catch (error) {
     console.error('Error adding property: error in catch block', error);
+    console.log( "api post data in catch block", propertyData);
     throw error;
   }
 }
