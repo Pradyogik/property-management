@@ -73,6 +73,8 @@ export default function TableV3() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const tableRef = useRef<HTMLDivElement>(null);
 
+  let srNo = 1
+
   const getCategoryColor = (category: string) => {
     const colors = {
       MIG: "bg-blue-50/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300",
@@ -132,7 +134,7 @@ export default function TableV3() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-
+  let serial = indexOfFirstItem +1
   console.log('Current items:', currentItems);
   // Row selection handlers
   const toggleRowSelection = (id: number) => {
@@ -329,15 +331,17 @@ export default function TableV3() {
                         <td
                           key={column.key}
                           className={`px-6 py-4 whitespace-nowrap text-sm ${
-                            column.key === "category"
+                            column.key === "property_category"
                               ? `${getCategoryColor(record[column.key])} w-32`
                               : "text-gray-900 dark:text-gray-200"
                           } ${index === 0 ? "sticky left-0 bg-inherit z-10" : ""}`}
                         >
-                          {record[column.key] != null
-                            ? record[column.key].toString()
-                            
-                            : ""}
+                           {record[column.key] != null
+                              ? column.key === "registration_date"
+                                ? new Date(record[column.key]).toLocaleDateString("en-GB")  
+                               : column.key==="serial_number" ? serial++
+                                : record[column.key].toString()
+                              : ""}
                         </td>
                       ))}
                     <td className="px-6 py-4 whitespace-nowrap">

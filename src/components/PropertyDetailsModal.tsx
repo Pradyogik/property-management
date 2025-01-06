@@ -33,18 +33,18 @@ interface Installment {
   installment_date: string;
 }
 
-const paymentHistory: PaymentRecord[] = [
-  { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '23-06-2010' },
-  { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '16-09-2010' },
-  { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '13-12-2010' },
-  { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '16-03-2011' },
-  { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '30-05-2011' },
-  { installmentAmount: 49927.50, interestAmount: 5991.75, delayedInterest: 0, date: '17-06-2011' },
-];
+// const paymentHistory: PaymentRecord[] = [
+//   { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '23-06-2010' },
+//   { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '16-09-2010' },
+//   { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '13-12-2010' },
+//   { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '16-03-2011' },
+//   { installmentAmount: 16682.50, interestAmount: 1997.25, delayedInterest: 0, date: '30-05-2011' },
+//   { installmentAmount: 49927.50, interestAmount: 5991.75, delayedInterest: 0, date: '17-06-2011' },
+// ];
 
 
 export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModalProps) {
-  console.log(property);
+  console.log(property.registration_date);
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
@@ -70,7 +70,9 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
               <DetailItem label="आवंटित संपत्ति की श्रेणी" value={property.property_category} />
               <DetailItem label="आवंटित संपत्ति की संख्या" value={property.property_number || '-'} />
               <DetailItem label="पंजीकरण धनराशि" value={property.registration_amount ? `₹${property.registration_amount}` : '-'} />
-              <DetailItem label="पंजीकरण दिनांक" value={property.registration_date || '-'} />
+              {/* <DetailItem label="पंजीकरण दिनांक" value={property.registration_date || '-'} /> */}
+              <DetailItem label="पंजीकरण दिनांक" value={property.registration_date ? new Date(property.registration_date).toLocaleDateString('en-GB') : '-'}/>
+
             </div>
           </div>
 
@@ -116,7 +118,8 @@ export function PropertyDetailsModal({ property, onClose }: PropertyDetailsModal
                       <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">₹{installment.installment_payment_amount.toFixed(2)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">₹{installment.installment_interest_amount.toFixed(2)}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{installment.delayed_interest_amount ? `₹${installment.delayed_interest_amount.toFixed(2)}` : '-'}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{installment.installment_date}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{
+                      installment.installment_date ? new Date (installment.installment_date).toLocaleDateString('en-GB'): '-'}</td>
                     </tr>
                   ))}
                 </tbody>
