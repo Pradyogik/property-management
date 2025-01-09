@@ -4,6 +4,7 @@ const API_BASE_URL = 'https://bida-new-db.vercel.app';
 
 
 
+
 interface Property {
   id: number;
   schemeName: string;
@@ -110,5 +111,56 @@ export async function addProperty(propertyData: any) {
     console.error('Error adding property: error in catch block', error);
     console.log( "api post data in catch block", propertyData);
     throw error;
+  }
+}
+
+
+// export async function updateProperty( propertyId:any ,propertyData:any) {
+//   try {
+//     console.log(propertyData , propertyId ," data before updating on backend");
+    
+//     const response = await fetch(`${API_BASE_URL}/property/${propertyId}`,{
+//       method: 'PUT',
+//       headers: {
+//         'Content-Type' : 'application/json'
+//       },
+//       body: JSON.stringify(propertyData),
+
+      
+//     })
+//     if(!response.ok){
+//       console.log('api post data if response not present' , propertyData);
+//       throw new Error(`HTTP error in response block! status: ${response.status}`);
+//     }
+//   } catch (error) {
+//     console.error('Error adding property: error in catch block', error);
+//     console.log( "api post data in catch block", propertyData);
+//     throw error;
+//   }
+// }
+
+
+
+export async function updateProperty(propertyId, propertyData) {
+  try {
+    console.log(propertyData, propertyId, 'Data before sending to backend');
+
+    const response = await axios.put(`${API_BASE_URL}/property/${propertyId}`, propertyData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status >= 200 && response.status < 300) {
+      console.log('Property updated successfully:', response.data);
+      return response.data; // Return response if needed
+    } else {
+      console.error('Unexpected response status:', response.status);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error updating property:', error);
+    console.log('Data sent to backend:', propertyData);
+    throw error; // Re-throw error to handle in the calling function
   }
 }

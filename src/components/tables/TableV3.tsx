@@ -20,6 +20,9 @@ import {
 } from "lucide-react";
 import { PropertyDetailsModal } from "../PropertyDetailsModal";
 import classNames from "classnames";
+import EditPropertyForm from "../EditPropertyDetailsModal";
+// import { EditPropertyDetailsModal } from "../EditPropertyDetailsModal";
+
 
 export default function TableV3() {
   const [data, setData] = useState<any[]>([]);
@@ -70,10 +73,21 @@ export default function TableV3() {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [actionType, setActionType] = useState(null); // "view" or "edit"
   const [categoryFilter, setCategoryFilter] = useState("all");
   const tableRef = useRef<HTMLDivElement>(null);
+console.log("all props",data);
 
-  let srNo = 1
+function getRegistrationAmt() {
+  return data.reduce((sum, item) => sum + parseFloat(item.registration_amount || 0), 0);
+}
+const regAmtStat = getRegistrationAmt();
+
+function getFreeHoldAmt(){
+  return data.reduce(function(sum , item){
+    return sum + parseFloat(item.freehold_amount)},0)
+}
+const freeHoldAmt = getFreeHoldAmt();
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -191,6 +205,9 @@ export default function TableV3() {
         </div>
       ) : (
         <>
+        
+          <h1> sum of all registration amount : {regAmtStat}</h1>
+          <h1> sum of all free hold amount : {freeHoldAmt}</h1>
           <div className="flex justify-between items-start p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="relative flex-1 max-w-lg">
               <input
@@ -252,6 +269,7 @@ export default function TableV3() {
           />
 
           {/* Action Buttons */}
+         
           <div className="px-4 py-3 border-t border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <input
@@ -271,6 +289,7 @@ export default function TableV3() {
               >
                 <Download className="h-4 w-4 mr-1" />
                 Export
+                
               </button>
               <button
                 onClick={handlePrint}
@@ -287,6 +306,7 @@ export default function TableV3() {
           </div>
 
           <div ref={tableRef} className="relative overflow-x-auto min-w-[1024px]">
+          
             <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-[#1C2537] sticky top-0 z-20">
                 <tr className="divide-x divide-gray-700">
@@ -342,11 +362,16 @@ export default function TableV3() {
                                : column.key==="serial_number" ? serial++
                                 : record[column.key].toString()
                               : ""}
+                              
                         </td>
                       ))}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => setSelectedProperty(record)}
+                        // onClick={() => setSelectedProperty(record)}
+                        onClick={() => {
+                          setSelectedProperty(record);
+                          setActionType("view");
+                        }}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-[#1C2537] text-blue-500 hover:bg-[#2D3748] rounded-lg transition-colors whitespace-nowrap"
                       >
                         <svg
@@ -372,6 +397,22 @@ export default function TableV3() {
                         View Details
                       </button>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        // onClick={() => setSelectedProperty(record)}
+                        onClick={() => {
+                          setSelectedProperty(record);
+                          setActionType("edit");
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-[#1C2537] text-blue-500 hover:bg-[#2D3748] rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-pencil w-4 h-4">
+                        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                        <path d="m15 5 4 4"/>
+                        </svg>
+                        Edit Details
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -381,7 +422,7 @@ export default function TableV3() {
           <div className="px-4 py-3 border-t dark:border-gray-700 bg-white dark:bg-[#1C2537] overflow-x-auto">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-400">
-                Showing <span className="font-medium">{indexOfFirstItem + 1}</span>{" "}
+                Showing  <span className="font-medium">{indexOfFirstItem + 1}</span>{" "}
                 to{" "}
                 <span className="font-medium">
                   {Math.min(indexOfLastItem, sortedData.length)}
@@ -422,12 +463,37 @@ export default function TableV3() {
             </div>
           </div>
 
-          {selectedProperty && (
+          {/* {selectedProperty && (
             <PropertyDetailsModal
               property={selectedProperty}
               onClose={() => setSelectedProperty(null)}
             />
           )}
+          {selectedProperty && (
+            <EditPropertyForm
+              property={selectedProperty}
+              onClose={() => setSelectedProperty(null)}
+            />
+          )} */}
+          {selectedProperty && actionType === "view" && (
+  <PropertyDetailsModal
+    property={selectedProperty}
+    onClose={() => {
+      setSelectedProperty(null);
+      setActionType(null);
+    }}
+  />
+)}
+
+{selectedProperty && actionType === "edit" && (
+  <EditPropertyForm
+    property={selectedProperty}
+    onClose={() => {
+      setSelectedProperty(null);
+      setActionType(null);
+    }}
+  />
+)}
         </>
       )}
     </div>
