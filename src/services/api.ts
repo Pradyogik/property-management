@@ -5,6 +5,7 @@ const API_BASE_URL = 'https://bida-new-db.vercel.app';
 
 
 
+
 interface Property {
   id: number;
   schemeName: string;
@@ -85,61 +86,29 @@ export async function getProperties(): Promise<Property[]> {
 }
 
 
-
-export async function addProperty(propertyData: any) {
+export const addProperty = async (formData: FormData) => {
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}:`, value , "api log fd data");
+  }
   try {
-    console.log( "api post data before", propertyData);
-    const response = await fetch(`${API_BASE_URL}/property`, {
-      method: 'POST',
+    const response = await axios.post(`${API_BASE_URL}/property`, formData, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
+        'Accept': 'application/json',
       },
-      // body: propertyData,
-      body: JSON.stringify(propertyData),
-      
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
     });
-    console.log( "api post data", propertyData);
-
-    if (!response.ok) {
-      console.log( "api post data if response not present", propertyData);
-      throw new Error(`HTTP error! status: ${response.status}`);
-
+    return response.data;
+  } catch (error: any) {
+    console.error('API Error api catch block:', error);
+    if (error.response) {
+      // console.error('Error status:', error.response.status);
+      console.error('Error data in api catch block:', error.response);
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error adding property: error in catch block', error);
-    console.log( "api post data in catch block", propertyData);
     throw error;
   }
-}
-
-
-// export async function updateProperty( propertyId:any ,propertyData:any) {
-//   try {
-//     console.log(propertyData , propertyId ," data before updating on backend");
-    
-//     const response = await fetch(`${API_BASE_URL}/property/${propertyId}`,{
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type' : 'application/json'
-//       },
-//       body: JSON.stringify(propertyData),
-
-      
-//     })
-//     if(!response.ok){
-//       console.log('api post data if response not present' , propertyData);
-//       throw new Error(`HTTP error in response block! status: ${response.status}`);
-//     }
-//   } catch (error) {
-//     console.error('Error adding property: error in catch block', error);
-//     console.log( "api post data in catch block", propertyData);
-//     throw error;
-//   }
-// }
-
-
+};
 
 export async function updateProperty(propertyId, propertyData) {
   try {
@@ -164,3 +133,50 @@ export async function updateProperty(propertyId, propertyData) {
     throw error; // Re-throw error to handle in the calling function
   }
 }
+
+
+
+
+// export async function addProperty(propertyData: any) {
+//   try {
+//     console.log( "api post data before", propertyData);
+//     const response = await fetch(`${API_BASE_URL}/property`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//       },
+//       // body: propertyData,
+//       body: JSON.stringify(propertyData),
+      
+//     });
+//     console.log( "api post data", propertyData);
+
+//     if (!response.ok) {
+//       console.log( "api post data if response not present", propertyData);
+//       throw new Error(`HTTP error! status: ${response.status}`);
+
+//     }
+
+//     return await response.json();
+//   } catch (error) {
+//     console.error('Error adding property: error in catch block', error);
+//     console.log( "api post data in catch block", propertyData);
+//     throw error;
+//   }
+// }
+
+// export const addProperty = async (formData:FormData) => {
+//   try {
+//     console.log(formData , "formdata in try block");
+//     const response = await axios.post(`${API_BASE_URL}/property`, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//       },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.log(error , 'error in catch block');
+    
+//     throw error;
+//   }
+// };
