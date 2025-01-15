@@ -197,9 +197,9 @@ export default function AddPropertyForm({ onClose }: AddPropertyFormProps) {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
    
-  if (serviceChargeHistory.length === 0) {
-    return;
-  }
+  // if (serviceChargeHistory.length === 0) {
+  //   return;
+  // }
   setIsSubmitting(true);
 
   try {

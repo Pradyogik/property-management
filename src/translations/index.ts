@@ -75,6 +75,20 @@ export const translations = {
     interestAmount: 'Interest Amount',
     delayedInterest: 'Delayed Interest',
     date: 'Date',
+
+     // new Property
+     newPropertyDetails: 'Property Details',
+     bidamartPropertyDetails: 'Bidamart Property Details',
+     bidamartManageProperties: 'Manage and view all properties in Bidamart scheme',
+     bidamartAddProperty: 'Add Property',
+     bidamartBasicInformation: 'Basic Information',
+     bidamartContactInformation: 'Contact Information',
+     bidamartFinancialDetails: 'Financial Details',
+     bidamartPaymentHistory: 'Payment History',
+     bidamartInstallmentAmount: 'Installment Amount',
+     bidamartInterestAmount: 'Interest Amount',
+     bidamartDelayedInterest: 'Delayed Interest',
+     bidamartDate: 'Date',
   },
   hi: {
     // Navigation
